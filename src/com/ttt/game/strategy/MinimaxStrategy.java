@@ -26,8 +26,6 @@ public class MinimaxStrategy extends Strategy {
 		GameState rootState = Game.INSTANCE.state().clone();
 		int depth = Game.INSTANCE.mechanic().depth(this, rootState);
 		
-		System.out.println("depth = " + depth);
-		
 		table.clear();
 		root = buildTree(Game.INSTANCE.state().clone(), Game.INSTANCE.botState(), depth);
 	}
