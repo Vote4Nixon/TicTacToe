@@ -1,6 +1,6 @@
 package com.ttt.game.model;
 
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -68,30 +68,35 @@ public class GameState {
 		return squares.get(row).get(col);
 	}
 	
+	public Collection<Row> rows() {
+		return rows.values();
+	}
+	
+	public Collection<Column> cols() {
+		return cols.values();
+	}
+	
+	public Collection<Diagonal> diags() {
+		return diags.values();
+	}
+	
 	public boolean finished() {
 		return !flatSquares.stream()
 				.anyMatch(s -> s.state() == SquareState.BLANK);
 	}
 	
-	public long maxCount(SquareState state) {
-		long rowMax = rows.values().stream()
-				.map(s -> s.count(state))
-				.max(Comparator.comparingLong(s -> s))
-				.get();
-		long colMax = cols.values().stream()
-				.map(s -> s.count(state))
-				.max(Comparator.comparingLong(s -> s))
-				.get();
-		long diagMax = diags.values().stream()
-				.map(s -> s.count(state))
-				.max(Comparator.comparingLong(s -> s))
-				.get();
-		
-		return Math.max(rowMax, Math.max(colMax, diagMax));
-	}
-	
 	public boolean won(SquareState state) {
-		return maxCount(state) == Game.INSTANCE.size();
+		if(rows.values().stream().anyMatch(s -> s.count(state) == Game.INSTANCE.size())) {
+			return true;
+		}
+		if(cols.values().stream().anyMatch(s -> s.count(state) == Game.INSTANCE.size())) {
+			return true;
+		}
+		if(diags.values().stream().anyMatch(s -> s.count(state) == Game.INSTANCE.size())) {
+			return true;
+		}
+		
+		return false;
 	}
 	
 	public Set<Square> squares() {

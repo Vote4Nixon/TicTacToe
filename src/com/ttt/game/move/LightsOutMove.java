@@ -1,5 +1,8 @@
 package com.ttt.game.move;
 
+import java.util.LongSummaryStatistics;
+import java.util.stream.Stream;
+
 import com.ttt.game.Game;
 import com.ttt.game.model.GameState;
 import com.ttt.game.model.Square;
@@ -37,18 +40,27 @@ public class LightsOutMove extends MoveMechanic {
 
 	@Override
 	public double score(GameState state) {
-		long playerCount = state.maxCount(Game.INSTANCE.playerState());
-		long botCount = state.maxCount(Game.INSTANCE.botState());
-		
-		if(botCount == Game.INSTANCE.size()) {
+		if(state.won(Game.INSTANCE.botState())) {
 			return Game.INSTANCE.size() + 1;
 		}
-		else if(playerCount == Game.INSTANCE.size()) {
+		else if(state.won(Game.INSTANCE.playerState())) {
 			return -1 * (Game.INSTANCE.size() + 1);
 		}
-		else {
-			return botCount - playerCount;
-		}
+		
+
+		LongSummaryStatistics rowStats = state.rows().stream()
+				.mapToLong(s -> s.count(Game.INSTANCE.botState()) - s.count(Game.INSTANCE.playerState()))
+				.summaryStatistics();
+		LongSummaryStatistics colStats = state.cols().stream()
+				.mapToLong(s -> s.count(Game.INSTANCE.botState()) - s.count(Game.INSTANCE.playerState()))
+				.summaryStatistics();
+		LongSummaryStatistics diagStats = state.diags().stream()
+				.mapToLong(s -> s.count(Game.INSTANCE.botState()) - s.count(Game.INSTANCE.playerState()))
+				.summaryStatistics();
+		
+		return Stream.of(rowStats, colStats, diagStats)
+				.mapToDouble(s -> s.getAverage())
+				.summaryStatistics().getAverage();
 	}
 	
 	private void moveAdjacent(Square square, SquareState state) {
