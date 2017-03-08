@@ -1,8 +1,5 @@
 package com.ttt.game.move;
 
-import java.util.LongSummaryStatistics;
-import java.util.stream.Stream;
-
 import com.ttt.game.Game;
 import com.ttt.game.model.GameState;
 import com.ttt.game.model.Square;
@@ -47,20 +44,10 @@ public class LightsOutMove extends MoveMechanic {
 			return -1 * (Game.INSTANCE.size() + 1);
 		}
 		
-
-		LongSummaryStatistics rowStats = state.rows().stream()
+		return state.sets().stream()
 				.mapToLong(s -> s.count(Game.INSTANCE.botState()) - s.count(Game.INSTANCE.playerState()))
-				.summaryStatistics();
-		LongSummaryStatistics colStats = state.cols().stream()
-				.mapToLong(s -> s.count(Game.INSTANCE.botState()) - s.count(Game.INSTANCE.playerState()))
-				.summaryStatistics();
-		LongSummaryStatistics diagStats = state.diags().stream()
-				.mapToLong(s -> s.count(Game.INSTANCE.botState()) - s.count(Game.INSTANCE.playerState()))
-				.summaryStatistics();
-		
-		return Stream.of(rowStats, colStats, diagStats)
-				.mapToDouble(s -> s.getAverage())
-				.summaryStatistics().getAverage();
+				.summaryStatistics()
+				.getAverage();
 	}
 	
 	private void moveAdjacent(Square square, SquareState state) {

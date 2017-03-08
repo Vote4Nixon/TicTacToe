@@ -1,6 +1,5 @@
 package com.ttt.game.model;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,6 +14,7 @@ public class GameState {
 	private Map<Integer, Row> rows;
 	private Map<Integer, Column> cols;
 	private Map<Integer, Diagonal> diags;
+	private Set<SquareSet> flatSets;
 	
 	public void initialize() {
 		squares = new HashMap<>();
@@ -30,16 +30,19 @@ public class GameState {
 			}
 		}
 		
+		flatSets = new HashSet<>();
 		rows = new HashMap<>();
 		cols = new HashMap<>();
 		for(int i = 0; i < Game.INSTANCE.size(); i++) {
 			Row r = new Row(i);
 			r.addAppropriateSquares(flatSquares);
 			rows.put(i, r);
+			flatSets.add(r);
 			
 			Column c = new Column(i);
 			c.addAppropriateSquares(flatSquares);
 			cols.put(i, c);
+			flatSets.add(c);
 		}
 		
 		diags = new HashMap<>();
@@ -47,6 +50,7 @@ public class GameState {
 			Diagonal d = new Diagonal(i);
 			d.addAppropriateSquares(flatSquares);
 			diags.put(i, d);
+			flatSets.add(d);
 		}
 	}
 	
@@ -68,35 +72,14 @@ public class GameState {
 		return squares.get(row).get(col);
 	}
 	
-	public Collection<Row> rows() {
-		return rows.values();
-	}
-	
-	public Collection<Column> cols() {
-		return cols.values();
-	}
-	
-	public Collection<Diagonal> diags() {
-		return diags.values();
-	}
-	
 	public boolean finished() {
 		return !flatSquares.stream()
 				.anyMatch(s -> s.state() == SquareState.BLANK);
 	}
 	
-	public boolean won(SquareState state) {
-		if(rows.values().stream().anyMatch(s -> s.count(state) == Game.INSTANCE.size())) {
-			return true;
-		}
-		if(cols.values().stream().anyMatch(s -> s.count(state) == Game.INSTANCE.size())) {
-			return true;
-		}
-		if(diags.values().stream().anyMatch(s -> s.count(state) == Game.INSTANCE.size())) {
-			return true;
-		}
-		
-		return false;
+	public boolean won(SquareState state) {		
+		return flatSets.stream()
+				.anyMatch(s -> s.count(state) == Game.INSTANCE.size());
 	}
 	
 	public Set<Square> squares() {
@@ -107,5 +90,9 @@ public class GameState {
 		return flatSquares.stream()
 				.filter(s -> s.state() == state)
 				.collect(Collectors.toSet());
+	}
+	
+	public Set<SquareSet> sets() {
+		return flatSets;
 	}
 }
